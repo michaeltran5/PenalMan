@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .game-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .word-display {
+            font-size: 2em;
+            margin: 20px 0;
+            letter-spacing: 5px;
+        }
+
+        .guesses {
+            margin: 20px 0;
+        }
+
+        input {
+            width: 30px;
+            font-size: 1.2em;
+            text-align: center;
+            margin: 10px;
+            padding: 5px;
+        }
+
+        button {
+            font-size: 1em;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .image-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            /* Made square for 3x3 grid */
+            margin: 20px auto;
+            overflow: hidden;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .mask-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* Changed to 3x3 */
+            grid-template-rows: repeat(3, 1fr);
+            /* Changed to 3x3 */
+        }
+
+        .mask-piece {
+            background-color: #333;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <h1>KAFKA GUESSING GAME</h1>
+        <div class="image-container">
+            <!-- Replace 'your-image.jpg' with your actual image path -->
+            <img src="/kafkaphoto.png" alt="Game Image" class="game-image">
+            <div class="mask-container" id="maskContainer"></div>
+        </div>
+        <div class="word-display" id="wordDisplay"></div>
+        <div class="guesses" id="guesses">Guessed letters: </div>
+        <input type="text" id="guessInput" maxlength="1" placeholder="?" />
+        <button onclick="makeGuess()">Guess</button>
+        <button onclick="newGame()">New Game</button>
+    </div>
+
+    <script>
+        const words = ['COMMANDANT', 'MACHINE', 'SOLDIER', 'FOREIGNER', 'CONDEMNED', 'MACHINE', 'PENALCOLONY', 'FRANZKAFKA'];
+        let word = '';
+        let guessedLetters = new Set();
+        let remainingGuesses = 9; // Changed to match 3x3 grid
+        let maskPieces = [];
+
+        function createMask() {
+            const container = document.getElementById('maskContainer');
+            container.innerHTML = '';
+            maskPieces = [];
+
+            // Create 3x3 grid of mask pieces
+            for (let i = 0; i < 9; i++) { // Changed to 9 pieces
+                const piece = document.createElement('div');
+                piece.className = 'mask-piece';
+                container.appendChild(piece);
+                maskPieces.push(piece);
+            }
+        }
+
+        function revealSection() {
+            const hiddenPieces = maskPieces.filter(piece =>
+                piece.style.opacity !== '0');
+
+            if (hiddenPieces.length > 0) {
+                const randomIndex = Math.floor(Math.random() * hiddenPieces.length);
+                hiddenPieces[randomIndex].style.opacity = '0';
+            }
+        }
+
+        function resetMask() {
+            maskPieces.forEach(piece => {
+                piece.style.opacity = '1';
+            });
+        }
+
+        function newGame() {
+            word = words[Math.floor(Math.random() * words.length)];
+            guessedLetters.clear();
+            remainingGuesses = 9; // Changed to match 3x3 grid
+            resetMask();
+            updateDisplay();
+            document.getElementById('guessInput').value = '';
+        }
+
+        function updateDisplay() {
+            // Update word display
+            const display = word
+                .split('')
+                .map(letter => guessedLetters.has(letter) ? letter : '_')
+                .join(' ');
+            document.getElementById('wordDisplay').textContent = display;
+
+            // Update guessed letters
+            document.getElementById('guesses').textContent =
+                'Guessed letters: ' + Array.from(guessedLetters).join(', ');
+
+            // Check win/lose conditions
+            if (!display.includes('_')) {
+                alert('Congratulations! You won!');
+            } else if (remainingGuesses === 0) {
+                alert('Game Over! The word was: ' + word);
+                // Reveal entire image
+                maskPieces.forEach(piece => piece.style.opacity = '0');
+            }
+        }
+
+        function makeGuess() {
+            const input = document.getElementById('guessInput');
+            const guess = input.value.toUpperCase();
+            input.value = '';
+
+            if (guess.length !== 1 || !/[A-Z]/.test(guess)) {
+                alert('Please enter a single letter.');
+                return;
+            }
+
+            if (guessedLetters.has(guess)) {
+                alert('You already guessed that letter!');
+                return;
+            }
+
+            guessedLetters.add(guess);
+
+            if (!word.includes(guess)) {
+                remainingGuesses--;
+                revealSection();
+            }
+
+            updateDisplay();
+        }
+
+        // Initialize the game
+        createMask();
+        newGame();
+
+        // Allow Enter key to submit guess
+        document.getElementById('guessInput').addEventListener('keyup', function (event) {
+            if (event.key === 'Enter') {
+                makeGuess();
+            }
+        });
+    </script>
+</body>
+
+</html>
