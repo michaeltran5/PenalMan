@@ -8,16 +8,27 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            margin: 0;
+            /* Add background image styling */
+            background-image: url('/PenalMan/background.jpg');
+            /* Replace with your background image */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
         .game-container {
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.9);
+            /* Semi-transparent white */
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             margin-top: 2rem;
             text-align: center;
+            backdrop-filter: blur(5px);
+            /* Adds a slight blur behind the container */
         }
 
         .word-display {
@@ -46,6 +57,7 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
@@ -56,9 +68,10 @@
             position: relative;
             width: 400px;
             height: 400px;
-            /* Made square for 3x3 grid */
             margin: 20px auto;
             overflow: hidden;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
         }
 
         .game-image {
@@ -75,14 +88,17 @@
             height: 100%;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            /* Changed to 3x3 */
             grid-template-rows: repeat(3, 1fr);
-            /* Changed to 3x3 */
         }
 
         .mask-piece {
             background-color: #333;
             transition: opacity 0.3s ease;
+        }
+
+        h1 {
+            color: #333;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -91,9 +107,7 @@
     <div class="game-container">
         <h1>KAFKA GUESSING GAME</h1>
         <div class="image-container">
-            <!-- Replace 'your-image.jpg' with your actual image path -->
             <img src="/PenalMan/kafkaphoto.png" alt="Game Image" class="game-image">
-
             <div class="mask-container" id="maskContainer"></div>
         </div>
         <div class="word-display" id="wordDisplay"></div>
@@ -107,7 +121,7 @@
         const words = ['COMMANDANT', 'MACHINE', 'SOLDIER', 'FOREIGNER', 'CONDEMNED', 'PENALCOLONY', 'FRANZKAFKA'];
         let word = '';
         let guessedLetters = new Set();
-        let remainingGuesses = 9; // Changed to match 3x3 grid
+        let remainingGuesses = 9;
         let maskPieces = [];
 
         function createMask() {
@@ -115,8 +129,7 @@
             container.innerHTML = '';
             maskPieces = [];
 
-            // Create 3x3 grid of mask pieces
-            for (let i = 0; i < 9; i++) { // Changed to 9 pieces
+            for (let i = 0; i < 9; i++) {
                 const piece = document.createElement('div');
                 piece.className = 'mask-piece';
                 container.appendChild(piece);
@@ -143,7 +156,7 @@
         function newGame() {
             word = words[Math.floor(Math.random() * words.length)];
             guessedLetters.clear();
-            remainingGuesses = 9; // Changed to match 3x3 grid
+            remainingGuesses = 9;
             resetMask();
             updateDisplay();
             document.getElementById('guessInput').value = '';
@@ -192,11 +205,9 @@
             updateDisplay();
         }
 
-        // Initialize the game
         createMask();
         newGame();
 
-        // Allow Enter key to submit guess
         document.getElementById('guessInput').addEventListener('keyup', function (event) {
             if (event.key === 'Enter') {
                 makeGuess();
